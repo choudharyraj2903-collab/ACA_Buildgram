@@ -8,7 +8,7 @@ import (
 	"insta-clone/models"
 )
 
-var posts []models.Post
+var posts = []models.Post{}
 var PostIDCounter int = 0
 
 func nextPostID() int {
@@ -36,4 +36,14 @@ func CreatePost(req models.CreatePostRequest) (models.Post, error) {
 	posts = append(posts, post)
 	return post, nil
 
+}
+
+func GetAllPosts(userID int) ([]models.Post ,error) {
+	var userPosts []models.Post	
+	for _, post := range posts {
+		if post.UserID == userID {
+			userPosts = append(userPosts, post)
+		}	
+	}
+	return userPosts, nil
 }

@@ -66,5 +66,22 @@ func main() {
 		c.JSON(http.StatusOK, user)
 	})
 
+	router.GET("/users/:id/posts", func(c *gin.Context) {
+
+		idParam := c.Param("id")
+		idParamInt, err := strconv.Atoi(idParam)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
+			return
+		}
+
+		posts ,err:= handler.GetAllPosts(idParamInt)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, posts)
+	})
+
 	router.Run(":8080")
 }
