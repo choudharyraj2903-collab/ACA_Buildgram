@@ -7,7 +7,7 @@ import (
 	"insta-clone/models"
 )
 
-var users []models.User
+var users = []models.User{}
 
 var UserIDCounter int = 0
 
@@ -34,4 +34,19 @@ func CreateUser(req models.CreateUserRequest) (models.User, error) {
 	users = append(users, user)
 	return user, nil
 
+}
+
+func GetAllUsers() []models.User {
+	return users
+}
+
+func GetUserByID(id int) (models.User, error) {
+
+	for _, user := range users {
+		if user.ID == id {
+			return user, nil
+		}
+	}
+
+	return models.User{}, errors.New("user not found")
 }
