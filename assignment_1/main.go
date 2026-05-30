@@ -27,6 +27,23 @@ func main() {
 		c.JSON(http.StatusOK, user)
 	})
 
+	router.POST("/posts",func(c *gin.Context) {
+		var req models.CreatePostRequest
+		
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		post, err := handler.CreatePost(req)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, post)
+	})
+
 	router.Run(":8080")
 
 }
+
