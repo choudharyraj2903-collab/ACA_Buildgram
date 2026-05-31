@@ -9,24 +9,14 @@ import (
 	"insta-clone/models"
 )
 
+
 func main() {
 	router := gin.Default()
 
-	router.POST("/users", func(c *gin.Context) {
-		var req models.CreateUserRequest
+	router.POST("/users", handler.CreateUser)
 
-		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
+	router.GET("/users/:id", handler.GetUserbyID)
 
-		user, err := handler.CreateUser(req)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-		c.JSON(http.StatusOK, user)
-	})
 
 	router.POST("/posts", func(c *gin.Context) {
 		var req models.CreatePostRequest
@@ -44,12 +34,8 @@ func main() {
 		c.JSON(http.StatusOK, post)
 	})
 
-	router.GET("/users", func(c *gin.Context) {
-		users := handler.GetAllUsers()
-		c.JSON(http.StatusOK, users)
-	})
 
-	router.GET("/users/:id", func(c *gin.Context) {
+	router.GET("/posts/:id", func(c *gin.Context) {
 
 		idParam := c.Param("id")
 		idParamInt, err := strconv.Atoi(idParam)
@@ -58,28 +44,16 @@ func main() {
 			return
 		}
 
-		user, err := handler.GetUserByID(idParamInt)
+		posts ,err:= handler.GetPostByUserID(idParamInt)
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusOK, user)
+		c.JSON(http.StatusOK, posts)
 	})
 
-	router.GET("/users/:id/posts", func(c *gin.Context) {
-
-		idParam := c.Param("id")
-		idParamInt, err := strconv.Atoi(idParam)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
-			return
-		}
-
-		posts ,err:= handler.GetAllPosts(idParamInt)
-		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-			return
-		}
+	router.GET("/posts", func(c *gin.Context) {
+		posts := handler.GetAllPosts()
 		c.JSON(http.StatusOK, posts)
 	})
 
