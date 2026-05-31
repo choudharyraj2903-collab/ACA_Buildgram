@@ -28,3 +28,16 @@ type CreatePostRequest struct {
 	ImageURL string `json:"image_url" binding:"required,url"`
 	Caption  string `json:"caption"`
 }
+
+type Comment struct {
+	ID 	int    `json:"id"`
+	PostID int    `json:"post_id"`
+	UserID int    `json:"user_id"`
+	Text   string `json:"text"`
+	Timestamp string `json:"timestamp"`
+}
+
+type CreateCommentRequest struct {
+	UserID int    `json:"user_id" binding:"required"`
+	Text   string `json:"text" binding:"required"`
+}

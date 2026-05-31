@@ -2,10 +2,14 @@ package handler
 
 import (
 	"strings"
-	"errors"
 	"time"
+	"net/http"
+	"strconv"
 
+
+	"github.com/gin-gonic/gin"
 	"insta-clone/models"
+	"insta-clone/response"
 )
 
 var posts = []models.Post{}
@@ -16,13 +20,20 @@ func nextPostID() int {
 	return PostIDCounter
 }
 
-func CreatePost(req models.CreatePostRequest) (models.Post, error) {
+func CreatePost( c *gin.Context){
+	var req models.CreatePostRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.SendErrorResponse(c, http.StatusBadRequest, "Invalid request data")
+		return
+	}
 
 	req.ImageURL = strings.TrimSpace(req.ImageURL)
 	req.Caption = strings.TrimSpace(req.Caption)
 
-	if req.ImageURL == "" || req.UserID == 0 {
-		return models.Post{}, errors.New("image url and user id are required")
+	if req.UserID == 0 || req.ImageURL == "" {
+		response.SendErrorResponse(c, http.StatusBadRequest, "user id and image url are required")
+		return
 	}
 
 	post := models.Post{
@@ -31,19 +42,29 @@ func CreatePost(req models.CreatePostRequest) (models.Post, error) {
 		ImageURL:  req.ImageURL,
 		Caption:   req.Caption,
 		Timestamp: time.Now().Format(time.RFC3339),
-		LikesCount: 0,
 	}
 	posts = append(posts, post)
-	return post, nil
-
+	response.SendSuccessResponse(c, http.StatusCreated, post)
 }
 
-func GetAllPosts(userID int) ([]models.Post ,error) {
-	var userPosts []models.Post	
-	for _, post := range posts {
-		if post.UserID == userID {
-			userPosts = append(userPosts, post)
-		}	
+func GetAllPosts(c *gin.Context) {
+	response.SendSuccessResponse(c, http.StatusOK, posts)
+}
+
+func LikePost(c *gin.Context) {
+	idParam := c.Param("id")
+	postID, err := strconv.Atoi(idParam)
+	if err != nil {
+		response.SendErrorResponse(c, http.StatusBadRequest, "Invalid post ID")
+		return
 	}
-	return userPosts, nil
+
+	for i, post := range posts {
+		if post.ID == postID {
+			posts[i].LikesCount++
+			response.SendSuccessResponse(c, http.StatusOK, posts[i])
+			return
+		}
+	}
+	response.SendErrorResponse(c, http.StatusNotFound, "Post not found")
 }
