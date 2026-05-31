@@ -1,43 +1,52 @@
 package models
 
-
 type User struct {
-	ID        int       `json:"id"`
-	Username string    `json:"username"`
-	Email     string    `json:"email"`
-	Bio	   string    `json:"bio"`
+	ID       int    `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Bio      string `json:"bio"`
 }
 
 type CreateUserRequest struct {
 	Username string `json:"username" binding:"required"`
 	Email    string `json:"email" binding:"required,email"`
-	Bio	   string `json:"bio"`
+	Bio      string `json:"bio"`
 }
 
 type Post struct {
-	ID 	 int    `json:"id"`
-	UserID int    `json:"user_id"`
-	ImageURL string `json:"image_url"`
-	Caption  string `json:"caption"`
-	Timestamp string `json:"timestamp"`
-	LikesCount int    `json:"likes_count"`
+	ID         int    `json:"id"`
+	UserID     int    `json:"userID"`
+	ImageURL   string `json:"imageURL"`
+	Caption    string `json:"caption"`
+	Timestamp  string `json:"timestamp"`
+	LikesCount int    `json:"likesCount"`
 }
 
 type CreatePostRequest struct {
-	UserID   int    `json:"user_id" binding:"required"`
-	ImageURL string `json:"image_url" binding:"required,url"`
-	Caption  string `json:"caption"`
+	UserID   int    `json:"userID" binding:"required"`
+	ImageURL string `json:"imageURL" binding:"required,url"`
+	Caption  string `json:"caption" binding:"required"`
 }
 
 type Comment struct {
-	ID 	int    `json:"id"`
-	PostID int    `json:"post_id"`
-	UserID int    `json:"user_id"`
-	Text   string `json:"text"`
+	ID        int    `json:"id"`
+	PostID    int    `json:"postID"`
+	UserID    int    `json:"userID"`
+	Text      string `json:"text"`
 	Timestamp string `json:"timestamp"`
 }
 
 type CreateCommentRequest struct {
-	UserID int    `json:"user_id" binding:"required"`
+	UserID int    `json:"userID" binding:"required"`
 	Text   string `json:"text" binding:"required"`
+}
+
+type PostWithComments struct {
+	Post     Post      `json:"post"`
+	Comments []Comment `json:"comments"`
+}
+
+type LikePostResponse struct {
+	ID         int `json:"id"`
+	LikesCount int `json:"likesCount"`
 }

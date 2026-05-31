@@ -1,11 +1,10 @@
-package handler 
+package handler
 
 import (
-	"strings"
-	"time"
 	"net/http"
 	"strconv"
-
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"insta-clone/models"
@@ -20,7 +19,7 @@ func nextPostID() int {
 	return PostIDCounter
 }
 
-func CreatePost( c *gin.Context){
+func CreatePost(c *gin.Context) {
 	var req models.CreatePostRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -31,11 +30,23 @@ func CreatePost( c *gin.Context){
 	req.ImageURL = strings.TrimSpace(req.ImageURL)
 	req.Caption = strings.TrimSpace(req.Caption)
 
-	if req.UserID == 0 || req.ImageURL == "" {
-		response.SendErrorResponse(c, http.StatusBadRequest, "user id and image url are required")
+	if req.UserID == 0 || req.ImageURL == "" || req.Caption == "" {
+		response.SendErrorResponse(c, http.StatusBadRequest, "user id, image url and caption are required")
 		return
 	}
 
+	UserExist := false
+	for _, user := range users {
+		if user.ID == req.UserID {
+			UserExist = true
+			break
+		}
+	}
+
+	if !UserExist {
+		response.SendErrorResponse(c, http.StatusNotFound, "User not found")
+		return
+	}
 	post := models.Post{
 		ID:        nextPostID(),
 		UserID:    req.UserID,
@@ -51,6 +62,42 @@ func GetAllPosts(c *gin.Context) {
 	response.SendSuccessResponse(c, http.StatusOK, posts)
 }
 
+func GetPostByID(c *gin.Context) {
+	idParam := c.Param("id")
+	postID, err := strconv.Atoi(idParam)
+	if err != nil {
+		response.SendErrorResponse(c, http.StatusBadRequest, "Invalid post ID")
+		return
+	}
+
+	var selectedPost models.Post
+	postFound := false
+	for _, post := range posts {
+		if post.ID == postID {
+			selectedPost = post
+			postFound = true
+			break
+		}
+	}
+
+	if !postFound {
+		response.SendErrorResponse(c, http.StatusNotFound, "Post not found")
+		return
+	}
+
+	postComments := []models.Comment{}
+	for _, comment := range comments {
+		if comment.PostID == postID {
+			postComments = append(postComments, comment)
+		}
+	}
+
+	response.SendSuccessResponse(c, http.StatusOK, models.PostWithComments{
+		Post:     selectedPost,
+		Comments: postComments,
+	})
+}
+
 func LikePost(c *gin.Context) {
 	idParam := c.Param("id")
 	postID, err := strconv.Atoi(idParam)
@@ -62,7 +109,10 @@ func LikePost(c *gin.Context) {
 	for i, post := range posts {
 		if post.ID == postID {
 			posts[i].LikesCount++
-			response.SendSuccessResponse(c, http.StatusOK, posts[i])
+			response.SendSuccessResponse(c, http.StatusOK, models.LikePostResponse{
+				ID:         posts[i].ID,
+				LikesCount: posts[i].LikesCount,
+			})
 			return
 		}
 	}

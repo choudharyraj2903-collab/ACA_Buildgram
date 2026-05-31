@@ -1,15 +1,15 @@
 package handler
 
 import (
-	"strings"
-	"time"
 	"net/http"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
-	"insta-clone/response"
 	"insta-clone/models"
+	"insta-clone/response"
 )
 
 var comments = []models.Comment{}
@@ -20,8 +20,7 @@ func nextCommentID() int {
 	return CommentIDCounter
 }
 
-
-func AddCommentToPost(c *gin.Context){
+func AddCommentToPost(c *gin.Context) {
 
 	idParam := c.Param("id")
 	postID, err := strconv.Atoi(idParam)
@@ -44,7 +43,7 @@ func AddCommentToPost(c *gin.Context){
 		return
 	}
 
-	//verifying if user exist 
+	//verifying if user exist
 	UserExist := false
 	for _, user := range users {
 		if user.ID == req.UserID {
@@ -60,17 +59,17 @@ func AddCommentToPost(c *gin.Context){
 		}
 	}
 	if !UserExist {
-		response.SendErrorResponse(c, http.StatusBadRequest, "User not found")
+		response.SendErrorResponse(c, http.StatusNotFound, "User not found")
 		return
 	}
 	if !PostExist {
-		response.SendErrorResponse(c, http.StatusBadRequest, "Post not found")
+		response.SendErrorResponse(c, http.StatusNotFound, "Post not found")
 		return
 	}
 
 	comment := models.Comment{
 		ID:        nextCommentID(),
-		PostID:   postID,
+		PostID:    postID,
 		UserID:    req.UserID,
 		Text:      req.Text,
 		Timestamp: time.Now().Format(time.RFC3339),
@@ -78,7 +77,6 @@ func AddCommentToPost(c *gin.Context){
 	comments = append(comments, comment)
 	response.SendSuccessResponse(c, http.StatusCreated, comment)
 }
-
 
 func GetAllComments(c *gin.Context) {
 	response.SendSuccessResponse(c, http.StatusOK, comments)
