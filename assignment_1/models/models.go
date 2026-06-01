@@ -1,12 +1,14 @@
 package models
-
+// the first step is to define the format in which we are storing , requesting and getting the data so that we have a welll defined format
 type User struct {
 	ID       int    `json:"id"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	Bio      string `json:"bio"`
 }
-
+// User,Post and Comment are the main struct storing the data temporary we also have some 
+// CreateUserRequest,CreatePostRequest and CreateCommentRequest struct which are used to bind the incoming request data to the struct and validate it using the binding tags
+// PostWithComments struct is used to return the post along with its comments in a single response and LikePostResponse struct is used to return the updated likes count after liking a post
 type CreateUserRequest struct {
 	Username string `json:"username" binding:"required"`
 	Email    string `json:"email" binding:"required,email"`
